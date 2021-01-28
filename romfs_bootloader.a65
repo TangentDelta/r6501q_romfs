@@ -26,6 +26,17 @@ COUNTAH	= $19		;Upper Counter A (read)
 COUNTAL	= $1A		;Lower Counter A (read)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;System Hardware Equates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+IOPAGE		= $EF00		;R65X1Q SBC Glitchbus I/O page
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Zilog SCC Equates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SCCC		= IOPAGE+0	;SCC Command Register A
+SCCD		= IOPAGE+1	;SCC Data Register A
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Zero-page variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SRCPTR	= $40		;Source pointer
@@ -230,15 +241,17 @@ LUPEND:	RTS			;Yep, SRCPTR now contains the desired ROMFS entry and we can retur
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;COUT -- Print a character to the console
 ;
+;Preserves A register.
+;
 ;pre: A register contains character to print
 ;post: character printed to console
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 COUT:	PHA			;Save A register
-COUT1:	LDA	SCSR		;Get UART status
-	AND	#$40		;Mask off XMTR Data Reg Empty
-	BEQ	COUT1		;Transmitter busy, wait
+COUT1:	LDA	SCCC		;Get SCC status
+	AND	#$04		;Mask off TX Buffer Empty bit
+	BEQ	COUT1		;Transmitter not empty, wait
 	PLA			;A = character to print
-	STA	SCDAT		;Send it to UART
+	STA	SCCD		;Send it to SCC
 	RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

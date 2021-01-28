@@ -35,6 +35,17 @@ SCSR	= $16		;Serial Communications Status Register
 SCDAT	= $17		;Serial Channel Data Register
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;System Hardware Equates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+IOPAGE		= $EF00		;R65X1Q SBC Glitchbus I/O page
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Zilog SCC Equates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SCCC		= IOPAGE+0	;SCC Command Register A
+SCCD		= IOPAGE+1	;SCC Data Register A
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Zero-page variables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SRCPTR	= $40		;Source pointer
@@ -91,7 +102,7 @@ START:	LDA	SCDAT		;Clear the serial data register in case a character is in the 
 	LDX	#(STARTM-MESSAG)	;Select the welcome message
 	JSR	PRINT
 
-KEYLUP:	LDA	SCSR		;Wait for any key to be pressed
+KEYLUP:	LDA	SCCC		;Wait for any key to be pressed
 	AND	#$01
 	BEQ	KEYLUP
 
@@ -263,15 +274,17 @@ PREND:	RTS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;COUT -- Print a character to the console
 ;
+;Preserves A register.
+;
 ;pre: A register contains character to print
 ;post: character printed to console
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 COUT:	PHA			;Save A register
-COUT1:	LDA	SCSR		;Get UART status
-	AND	#$40		;Mask off XMTR Data Reg Empty
-	BEQ	COUT1		;Transmitter busy, wait
+COUT1:	LDA	SCCC		;Get SCC status
+	AND	#$04		;Mask off TX Buffer Empty bit
+	BEQ	COUT1		;Transmitter not empty, wait
 	PLA			;A = character to print
-	STA	SCDAT		;Send it to UART
+	STA	SCCD		;Send it to SCC
 	RTS
 
 ;;;;;;;;;;;;;;;;;;;
@@ -279,7 +292,9 @@ COUT1:	LDA	SCSR		;Get UART status
 ;;;;;;;;;;;;;;;;;;;
 
 MESSAG:
-STARTM:	.byte	$0d,$0a,"Update 2020-12-01",$0d,$0a,"Move WR switch to on position",$0d,$0a,"Press any key when ready",$00
+STARTM:	.byte	$0d,$0a,"Update 2021-01-28"
+	.byte	$0d,$0a,"Zilog SCC Version"
+	.byte	$0d,$0a,"Move WR switch to on position",$0d,$0a,"Press any key when ready",$00
 WRTM:	.byte	$0d,$0a,"Writing",$00
 ENDM:	.byte	$0d,$0a,"Done",$0d,$0a,"Set switches to 0 and press reset button",$00
 
