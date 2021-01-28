@@ -1,12 +1,16 @@
-# ROMFS for Glitch Works R65X1Q SBC
+# ROMFS for Glitch Works R65X1Q SBC With Zilog SCC Board
 
 This repository contains source files and utilities for using ROMFS on the [Glitch Works R65X1Q SBC](https://www.tindie.com/products/21523/). ROMFS is a simple file system intended for use with EPROMs, EEPROMs, and other nonvolatile memory.
+
+This version of the ROMFS utilities has been modified to utilize a Zilog Z85C30 SCC instead of the R65X1Q's built-in serial channel. The use of the Zilog SCC enables significantly faster baudrates.
+
+At the moment, only the bootloader, updater, and eWoz have been modified to utilize the SCC.
 
 ### Updating ROMFS
 
 There are two different updaters available. `updater/updater_conf2.hex` contains RSC-FORTH configuration 2 and will work on an R65X1Q SBC without a Glitchbus 32K memory expansion board. `updater/updater_conf3.hex` contains RSC-FORTH configuration 3 and requires a Glitchbus 32K memory expansion board.
 
-Load the desired updater hex file using the eWoz ROM monitor -- this will take two to three minutes at 4800 bps. Once the hex load has finished with a success message, execute the loader by typing:
+Load the desired updater hex file using the eWoz ROM monitor. Once the hex load has finished with a success message, execute the loader by typing:
 
 `200R`
 
