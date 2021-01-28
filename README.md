@@ -6,6 +6,8 @@ This version of the ROMFS utilities has been modified to utilize a Zilog Z85C30 
 
 At the moment, only the bootloader, updater, and eWoz have been modified to utilize the SCC.
 
+[The repository for the modified version of eWoz can be found here.](https://github.com/TangentDelta/ewoz_r6501)
+
 ### Updating ROMFS
 
 There are two different updaters available. `updater/updater_conf2.hex` contains RSC-FORTH configuration 2 and will work on an R65X1Q SBC without a Glitchbus 32K memory expansion board. `updater/updater_conf3.hex` contains RSC-FORTH configuration 3 and requires a Glitchbus 32K memory expansion board.
